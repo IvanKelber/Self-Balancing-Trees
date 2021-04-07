@@ -266,3 +266,87 @@ func TestAunt(t *testing.T) {
 		}
 	}
 }
+
+func TestDistantNiece(t *testing.T) {
+	type TestCase struct {
+		nodeVal  int
+		isNil    bool
+		expected int
+	}
+	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
+	rb := RedBlackTree(treeVals[0])
+	for i := range treeVals {
+		rb.Insert(treeVals[i])
+	}
+
+	cases := []TestCase{
+		{10, true, -1},
+		{5, false, 20},
+		{15, false, 3},
+		{3, true, -1},
+		{8, true, -1},
+		{12, true, -1},
+		{20, true, -1},
+	}
+	for _, testcase := range cases {
+		node := rb.traverse(testcase.nodeVal)
+		niece := node.getDistantNiece()
+		if (niece == nil || niece.isNil) && !testcase.isNil {
+			t.Errorf("GetDistantNiece(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, niece)
+			continue
+		}
+		if (niece == nil || niece.isNil) && testcase.isNil {
+			continue
+		}
+		if niece != nil && !niece.isNil && testcase.isNil {
+			t.Errorf("GetDistantNiece(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, nil, niece.val)
+			continue
+		}
+
+		if got := niece.val; got != testcase.expected {
+			t.Errorf("GetDistantNiece(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
+		}
+	}
+}
+
+func TestCloseNiece(t *testing.T) {
+	type TestCase struct {
+		nodeVal  int
+		isNil    bool
+		expected int
+	}
+	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
+	rb := RedBlackTree(treeVals[0])
+	for i := range treeVals {
+		rb.Insert(treeVals[i])
+	}
+
+	cases := []TestCase{
+		{10, true, -1},
+		{5, false, 12},
+		{15, false, 8},
+		{3, true, -1},
+		{8, true, -1},
+		{12, true, -1},
+		{20, true, -1},
+	}
+	for _, testcase := range cases {
+		node := rb.traverse(testcase.nodeVal)
+		niece := node.getCloseNiece()
+		if (niece == nil || niece.isNil) && !testcase.isNil {
+			t.Errorf("GetCloseNiece(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, niece)
+			continue
+		}
+		if (niece == nil || niece.isNil) && testcase.isNil {
+			continue
+		}
+		if niece != nil && !niece.isNil && testcase.isNil {
+			t.Errorf("GetCloseNiece(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, nil, niece.val)
+			continue
+		}
+
+		if got := niece.val; got != testcase.expected {
+			t.Errorf("GetCloseNiece(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
+		}
+	}
+}
