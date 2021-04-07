@@ -85,17 +85,17 @@ func TestParent(t *testing.T) {
 		isNil    bool
 		expected int
 	}
-	treeVals := []int{2, 1, 3, 4}
+	treeVals := []int{10, 5, 15, 8}
 	rb := RedBlackTree(treeVals[0])
 	for i := range treeVals {
 		rb.Insert(treeVals[i])
 	}
 
 	cases := []TestCase{
-		{2, true, -1},
-		{1, false, 2},
-		{3, false, 2},
-		{4, false, 3},
+		{10, true, -1},
+		{5, false, 10},
+		{15, false, 10},
+		{8, false, 5},
 	}
 	for _, testcase := range cases {
 		node := rb.traverse(testcase.nodeVal)
@@ -114,6 +114,155 @@ func TestParent(t *testing.T) {
 
 		if got := parent.val; got != testcase.expected {
 			t.Errorf("GetParent(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
+		}
+	}
+}
+
+func TestGrandparent(t *testing.T) {
+	type TestCase struct {
+		nodeVal  int
+		isNil    bool
+		expected int
+	}
+	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
+	rb := RedBlackTree(treeVals[0])
+	for i := range treeVals {
+		rb.Insert(treeVals[i])
+	}
+
+	cases := []TestCase{
+		{10, true, -1},
+		{5, true, -1},
+		{15, true, -1},
+		{3, false, 10},
+		{8, false, 10},
+		{12, false, 10},
+		{20, false, 10},
+	}
+	for _, testcase := range cases {
+		node := rb.traverse(testcase.nodeVal)
+		grandParent := node.getGrandParent()
+		if grandParent == nil && !testcase.isNil {
+			t.Errorf("GetGrandParent(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, grandParent)
+			continue
+		}
+		if grandParent == nil && testcase.isNil {
+			continue
+		}
+		if grandParent != nil && testcase.isNil {
+			t.Errorf("GetGrandParent(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, nil, grandParent.val)
+			continue
+		}
+
+		if got := grandParent.val; got != testcase.expected {
+			t.Errorf("GetGrandParent(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
+		}
+	}
+}
+
+func TestDirection(t *testing.T) {
+	type TestCase struct {
+		nodeVal  int
+		expected int
+	}
+	treeVals := []int{10, 5, 15}
+	rb := RedBlackTree(treeVals[0])
+	for i := range treeVals {
+		rb.Insert(treeVals[i])
+	}
+
+	cases := []TestCase{
+		{10, RootNode},
+		{5, Left},
+		{15, Right},
+	}
+	for _, testcase := range cases {
+		node := rb.traverse(testcase.nodeVal)
+
+		if got := node.getDirection(); got != testcase.expected {
+			t.Errorf("GetDirection(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
+		}
+	}
+}
+func TestSibling(t *testing.T) {
+	type TestCase struct {
+		nodeVal  int
+		isNil    bool
+		expected int
+	}
+	treeVals := []int{10, 5, 15, 8, 3, 12}
+	rb := RedBlackTree(treeVals[0])
+	for i := range treeVals {
+		rb.Insert(treeVals[i])
+	}
+
+	cases := []TestCase{
+		{10, true, -1},
+		{5, false, 15},
+		{15, false, 5},
+		{3, false, 8},
+		{8, false, 3},
+		{12, true, -1},
+	}
+	for _, testcase := range cases {
+		node := rb.traverse(testcase.nodeVal)
+		sibling := node.getSibling()
+		if (sibling == nil || sibling.isNil) && !testcase.isNil {
+			t.Errorf("GetSibling(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, sibling)
+			continue
+		}
+		if (sibling == nil || sibling.isNil) && testcase.isNil {
+			continue
+		}
+		if sibling != nil && !sibling.isNil && testcase.isNil {
+			t.Errorf("GetSibling(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, nil, sibling.val)
+			continue
+		}
+
+		if got := sibling.val; got != testcase.expected {
+			t.Errorf("GetSibling(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
+		}
+	}
+}
+
+func TestAunt(t *testing.T) {
+	type TestCase struct {
+		nodeVal  int
+		isNil    bool
+		expected int
+	}
+	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
+	rb := RedBlackTree(treeVals[0])
+	for i := range treeVals {
+		rb.Insert(treeVals[i])
+	}
+
+	cases := []TestCase{
+		{10, true, -1},
+		{5, true, -1},
+		{15, true, -1},
+		{3, false, 15},
+		{8, false, 15},
+		{12, false, 5},
+		{20, false, 5},
+	}
+	for _, testcase := range cases {
+		node := rb.traverse(testcase.nodeVal)
+		aunt := node.getAunt()
+		if (aunt == nil || aunt.isNil) && !testcase.isNil {
+			t.Errorf("GetAunt(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, aunt)
+			continue
+		}
+		if (aunt == nil || aunt.isNil) && testcase.isNil {
+			continue
+		}
+		if aunt != nil && !aunt.isNil && testcase.isNil {
+			t.Errorf("GetAunt(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, nil, aunt.val)
+			continue
+		}
+
+		if got := aunt.val; got != testcase.expected {
+			t.Errorf("GetAunt(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
 		}
 	}
 }

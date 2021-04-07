@@ -94,10 +94,10 @@ func (rb *RBNode) Insert(val int) bool {
 	n.color = Red
 	n.parent = cur
 	if cur.val > val {
-		*cur.left() = *n
+		cur.kids[Left] = n
 	} else {
 		//Note that cur.Val != val because we would have already returned
-		*cur.right() = *n
+		cur.kids[Right] = n
 	}
 
 	return true
@@ -132,7 +132,9 @@ func (rb *RBNode) getGrandParent() *RBNode {
 
 func (rb *RBNode) getSibling() *RBNode {
 	direction := rb.getDirection()
+	fmt.Printf("direction of %d is %d\n", rb.val, direction)
 	if direction != RootNode {
+		fmt.Printf("sibling of %d is %d\n", rb.val, rb.getParent().kids[(direction+1)%2].val)
 		return rb.getParent().kids[(direction+1)%2]
 	}
 	return nil
@@ -141,6 +143,8 @@ func (rb *RBNode) getSibling() *RBNode {
 func (rb *RBNode) getAunt() *RBNode {
 	parent := rb.getParent()
 	if parent != nil {
+		fmt.Printf("Parent of %d is %d\n", rb.val, parent.val)
+
 		return parent.getSibling()
 	}
 	return nil
