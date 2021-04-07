@@ -78,3 +78,42 @@ func TestContains(t *testing.T) {
 		}
 	}
 }
+
+func TestParent(t *testing.T) {
+	type TestCase struct {
+		nodeVal  int
+		isNil    bool
+		expected int
+	}
+	treeVals := []int{2, 1, 3, 4}
+	rb := RedBlackTree(treeVals[0])
+	for i := range treeVals {
+		rb.Insert(treeVals[i])
+	}
+
+	cases := []TestCase{
+		{2, true, -1},
+		{1, false, 2},
+		{3, false, 2},
+		{4, false, 3},
+	}
+	for _, testcase := range cases {
+		node := rb.traverse(testcase.nodeVal)
+		parent := node.getParent()
+		if parent == nil && !testcase.isNil {
+			t.Errorf("GetParent(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, parent)
+			continue
+		}
+		if parent == nil && testcase.isNil {
+			continue
+		}
+		if parent != nil && testcase.isNil {
+			t.Errorf("GetParent(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, nil, parent.val)
+			continue
+		}
+
+		if got := parent.val; got != testcase.expected {
+			t.Errorf("GetParent(%d) Expected '%v' but got '%v' instead", testcase.nodeVal, testcase.expected, got)
+		}
+	}
+}

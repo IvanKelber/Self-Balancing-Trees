@@ -9,6 +9,12 @@ type Color bool
 var Red Color = true
 var Black Color = false
 
+const (
+	Left = iota
+	Right
+	RootNode
+)
+
 type RBNode struct {
 	val    int
 	isNil  bool
@@ -35,11 +41,11 @@ func (rb *RBNode) String() string {
 }
 
 func (rb *RBNode) left() *RBNode {
-	return rb.kids[0]
+	return rb.kids[Left]
 }
 
 func (rb *RBNode) right() *RBNode {
-	return rb.kids[1]
+	return rb.kids[Right]
 }
 
 func (rb *RBNode) GetList() []int {
@@ -63,7 +69,7 @@ func (rb *RBNode) Contains(val int) bool {
 	return false
 }
 
-func (rb *RBNode) Insert(val int) bool {
+func (rb *RBNode) traverse(val int) *RBNode {
 	cur := rb
 	for !cur.isNil {
 		if cur.val > val {
@@ -72,13 +78,21 @@ func (rb *RBNode) Insert(val int) bool {
 			cur = cur.right()
 		} else {
 			//Value already exists so we could not insert the node
-			return false
+			return cur
 		}
 	}
+	return cur.getParent()
+}
 
-	cur = cur.parent
+func (rb *RBNode) Insert(val int) bool {
+
+	cur := rb.traverse(val)
+	if cur.val == val {
+		return false
+	}
 	n := RedBlackTree(val)
 	n.color = Red
+	n.parent = cur
 	if cur.val > val {
 		*cur.left() = *n
 	} else {
@@ -87,6 +101,21 @@ func (rb *RBNode) Insert(val int) bool {
 	}
 
 	return true
+}
+
+func (rb *RBNode) getDirection() int {
+	p := rb.getParent()
+	if p == nil {
+		return RootNode
+	}
+	if p.left() == rb {
+		return Left
+	}
+	if p.right() == rb {
+		return Right
+	}
+	fmt.Println("Error determining direction")
+	return RootNode
 }
 
 func (rb *RBNode) getParent() *RBNode {
@@ -101,8 +130,36 @@ func (rb *RBNode) getGrandParent() *RBNode {
 	return nil
 }
 
-// func (rb *RBNode) getSibling() *RBNode {
-// 	p := rb.getParent()
-// 	if p != nil && p.left
-// 	return rb.parent
-// }
+func (rb *RBNode) getSibling() *RBNode {
+	direction := rb.getDirection()
+	if direction != RootNode {
+		return rb.getParent().kids[(direction+1)%2]
+	}
+	return nil
+}
+
+func (rb *RBNode) getAunt() *RBNode {
+	parent := rb.getParent()
+	if parent != nil {
+		return parent.getSibling()
+	}
+	return nil
+}
+
+func (rb *RBNode) getDistantNiece() *RBNode {
+	sibling := rb.getSibling()
+	if sibling != nil && !sibling.isNil {
+		direction := rb.getDirection()
+		return sibling.kids[(direction+1)%2]
+	}
+	return nil
+}
+
+func (rb *RBNode) getCloseNiece() *RBNode {
+	sibling := rb.getSibling()
+	if sibling != nil && !sibling.isNil {
+		direction := rb.getDirection()
+		return sibling.kids[direction]
+	}
+	return nil
+}
