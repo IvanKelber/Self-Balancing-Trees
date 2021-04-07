@@ -64,7 +64,7 @@ func (rb *RBNode) Insert(val int) bool {
 		} else if cur.val < val {
 			cur = cur.right
 		} else {
-			fmt.Printf("Error inserting %d.  Value already exists\n", val)
+			//Value already exists so we could not insert the node
 			return false
 		}
 	}
