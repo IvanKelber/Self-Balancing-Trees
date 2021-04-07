@@ -47,8 +47,8 @@ func TestInsertion(t *testing.T) {
 	}
 }
 
-func TestSearch(t *testing.T) {
-	type InsertionTestCase struct {
+func TestContains(t *testing.T) {
+	type ContainsTestCase struct {
 		searchVal int
 		expected  bool
 	}
@@ -58,7 +58,7 @@ func TestSearch(t *testing.T) {
 		rb.Insert(treeVals[i])
 	}
 
-	cases := []InsertionTestCase{
+	cases := []ContainsTestCase{
 		{0, true},
 		{1, true},
 		{2, true},
