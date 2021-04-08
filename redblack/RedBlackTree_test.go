@@ -350,3 +350,45 @@ func TestCloseNiece(t *testing.T) {
 		}
 	}
 }
+
+func TestRotate(t *testing.T) {
+	type TestCase struct {
+		treeVals           []int
+		direction          int
+		subtreeVal         int
+		expectedNewSubtree int
+	}
+
+	cases := []TestCase{
+		{[]int{100, 120, 150}, Left, 100, 120},
+		{[]int{100, 50, 30}, Right, 100, 50},
+		{[]int{100, 50, 120, 80, 90, 95}, Left, 80, 90},
+		{[]int{100, 50, 30, 120, 80, 70, 90, 95}, Left, 50, 80},
+		{[]int{100, 80, 50, 30, 120, 70, 90, 95}, Right, 100, 80},
+	}
+	for _, testcase := range cases {
+
+		rb := RedBlackTree(testcase.treeVals[0])
+		for i := range testcase.treeVals {
+			rb.Insert(testcase.treeVals[i])
+		}
+		originalString := rb.String()
+		subtree := rb.traverse(testcase.subtreeVal)
+		newSubtree := rb.rotate(subtree, testcase.direction)
+		if newSubtree == nil {
+			t.Errorf("Rotate(%d, %d) resulted in nil new subtree", testcase.subtreeVal, testcase.direction)
+		}
+		if got := newSubtree.val; got != testcase.expectedNewSubtree {
+			t.Errorf("Rotate(%d, %d) Expected '%d' but got '%d' instead", testcase.subtreeVal, testcase.direction,
+				testcase.expectedNewSubtree, got)
+		}
+		if newSubtree.parent == nil {
+			rb = newSubtree
+		}
+		newString := rb.String()
+		if newString != originalString {
+			t.Errorf("Rotate(%d, %d) Expected '%s' but got '%s' instead", testcase.subtreeVal, testcase.direction,
+				originalString, newString)
+		}
+	}
+}

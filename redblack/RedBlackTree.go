@@ -163,3 +163,36 @@ func (rb *RBNode) getCloseNiece() *RBNode {
 	}
 	return nil
 }
+
+func (rb *RBNode) getRoot() *RBNode {
+	cur := rb
+	for cur.parent != nil {
+		cur = cur.parent
+	}
+	return cur
+}
+
+//Make sure to check if the returned newSubtree has a parent
+//If it doesn't then it is the new root of the entire tree
+func (root *RBNode) rotate(subtree *RBNode, direction int) *RBNode {
+
+	parent := subtree.getParent()
+	subtreeDirection := subtree.getDirection()
+
+	//get child of the subtree in the opposite direction that we are rotating
+	newSubtree := subtree.kids[(direction+1)%2]
+	if newSubtree.isNil {
+		fmt.Println("Error while rotating: child is null")
+		return root
+	}
+	newSubtree.kids[direction].parent = subtree
+	newSubtree.parent = parent
+	if parent != nil {
+		parent.kids[subtreeDirection] = newSubtree
+	}
+	subtree.kids[(direction+1)%2] = newSubtree.kids[direction]
+	newSubtree.kids[direction] = subtree
+	subtree.parent = newSubtree
+
+	return newSubtree
+}
