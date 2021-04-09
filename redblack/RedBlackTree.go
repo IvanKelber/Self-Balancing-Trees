@@ -84,11 +84,11 @@ func (rb *RBNode) traverse(val int) *RBNode {
 	return cur.getParent()
 }
 
-func (rb *RBNode) Insert(val int) bool {
+func (rb *RBNode) Insert(val int) *RBNode {
 
 	cur := rb.traverse(val)
 	if cur.val == val {
-		return false
+		return nil
 	}
 	n := RedBlackTree(val)
 	n.color = Red
@@ -100,7 +100,7 @@ func (rb *RBNode) Insert(val int) bool {
 		cur.kids[Right] = n
 	}
 
-	return true
+	return n
 }
 
 func (rb *RBNode) getDirection() int {
@@ -195,4 +195,69 @@ func (root *RBNode) rotate(subtree *RBNode, direction int) *RBNode {
 	subtree.parent = newSubtree
 
 	return newSubtree
+}
+
+//In many cases node is the node that we just inserted into the tree
+//However in some cases node refers to a recently updated node that may be causing a violation
+func (root *RBNode) fixUp(node *RBNode) *RBNode {
+	//case 0:
+	if root == node {
+		root.color = Black
+		return root
+	}
+	parent := node.getParent() //must not be null otherwise we have case 0
+	grandparent := node.getGrandParent()
+	if grandparent == nil {
+		//grandparent is nil so we have no aunts and therefore no violation
+		return root
+	}
+	if node.color == Red && parent.color == Red {
+		aunt := node.getAunt()
+		//case 1:
+		if aunt.color == Red {
+			//push blackness from grandparent
+			aunt.color = Black
+			parent.color = Black
+			grandparent.color = Red
+			potentialRoot := root.fixUp(grandparent)
+			if potentialRoot.parent == nil {
+				return potentialRoot
+			}
+			return root
+		}
+		parentDirection := parent.getDirection()
+		nodeDirection := node.getDirection()
+
+		//case 2:
+		if parentDirection == nodeDirection {
+			// straight line
+			// rotate in the opposite direction of the parent and node
+			newSubtree := root.rotate(grandparent, (parentDirection+1)%2)
+			newSubtree.color = Black
+			grandparent.color = Red
+
+			return newSubtree
+		}
+		//case 3:
+		if parentDirection != nodeDirection {
+			//rotate in the direction of the parent from the parent
+			root.rotate(parent, parentDirection)
+			//then rotate in the direction of the node from the grandparent
+			potentialRoot := root.rotate(grandparent, nodeDirection)
+			if potentialRoot.parent == nil {
+				root = potentialRoot
+			}
+			root = root.fixUp(potentialRoot)
+		}
+
+	}
+	return root
+}
+
+func (rb *RBNode) InsertAndBalance(val int) *RBNode {
+	node := rb.Insert(val)
+	if node == nil {
+		return nil
+	}
+	return rb.fixUp(node)
 }

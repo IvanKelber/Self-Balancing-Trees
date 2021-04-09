@@ -37,10 +37,8 @@ func TestInsertion(t *testing.T) {
 		{[]int{-1, -2, -3, -2, -3, -1}, "[-3 -2 -1]"},
 	}
 	for _, testcase := range cases {
-		rb := RedBlackTree(testcase.insertionOrder[0])
-		for i := 1; i < len(testcase.insertionOrder); i++ {
-			rb.Insert(testcase.insertionOrder[i])
-		}
+		rb := TreeFromValues(testcase.insertionOrder, false)
+
 		if got := rb.String(); got != testcase.expected {
 			t.Errorf("Inserting(%v) Expected '%s' but got '%s' instead", testcase.insertionOrder, testcase.expected, got)
 		}
@@ -53,10 +51,7 @@ func TestContains(t *testing.T) {
 		expected  bool
 	}
 	treeVals := []int{0, 1, 2, 3, 4, 5, -1, -math.MaxInt32}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []ContainsTestCase{
 		{0, true},
@@ -86,10 +81,7 @@ func TestParent(t *testing.T) {
 		expected int
 	}
 	treeVals := []int{10, 5, 15, 8}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []TestCase{
 		{10, true, -1},
@@ -125,10 +117,7 @@ func TestGrandparent(t *testing.T) {
 		expected int
 	}
 	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []TestCase{
 		{10, true, -1},
@@ -166,10 +155,7 @@ func TestDirection(t *testing.T) {
 		expected int
 	}
 	treeVals := []int{10, 5, 15}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []TestCase{
 		{10, RootNode},
@@ -191,10 +177,7 @@ func TestSibling(t *testing.T) {
 		expected int
 	}
 	treeVals := []int{10, 5, 15, 8, 3, 12}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []TestCase{
 		{10, true, -1},
@@ -232,10 +215,7 @@ func TestAunt(t *testing.T) {
 		expected int
 	}
 	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []TestCase{
 		{10, true, -1},
@@ -274,10 +254,7 @@ func TestDistantNiece(t *testing.T) {
 		expected int
 	}
 	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []TestCase{
 		{10, true, -1},
@@ -316,10 +293,7 @@ func TestCloseNiece(t *testing.T) {
 		expected int
 	}
 	treeVals := []int{10, 5, 15, 8, 3, 12, 20}
-	rb := RedBlackTree(treeVals[0])
-	for i := range treeVals {
-		rb.Insert(treeVals[i])
-	}
+	rb := TreeFromValues(treeVals, false)
 
 	cases := []TestCase{
 		{10, true, -1},
@@ -368,10 +342,7 @@ func TestRotate(t *testing.T) {
 	}
 	for _, testcase := range cases {
 
-		rb := RedBlackTree(testcase.treeVals[0])
-		for i := range testcase.treeVals {
-			rb.Insert(testcase.treeVals[i])
-		}
+		rb := TreeFromValues(testcase.treeVals, false)
 		originalString := rb.String()
 		subtree := rb.traverse(testcase.subtreeVal)
 		newSubtree := rb.rotate(subtree, testcase.direction)
@@ -391,4 +362,57 @@ func TestRotate(t *testing.T) {
 				originalString, newString)
 		}
 	}
+}
+
+func TestInsertAndBalance(t *testing.T) {
+	type TestCase struct {
+		treeVals []int
+	}
+
+	cases := []TestCase{
+		{[]int{100, 120, 150, 170, 190, 210, 230, 250}},
+		{[]int{100, 90, 80, 70, 60, 50, 40, 30, 20, 10}},
+		{[]int{100, 50, 150, 30, 80, 70, 75, 78, 90, 95, 96, 97, 98, 99}},
+		{[]int{100, 200, 300, 400, 150, 151, 152, 153, 154, 155}},
+		{[]int{100, 200, 300, 400, 150, 149, 148, 147, 146, 145}},
+		{[]int{100, 200, 300, 400, 350, 325, 375, 330, 315, 360, 390}},
+		{[]int{100, 99}},
+		{[]int{100}},
+		{[]int{100, 99, 101}},
+		{[]int{100, 99, 89}},
+		{[]int{100, 101, 102}},
+	}
+	for _, testcase := range cases {
+		referenceTree := TreeFromValues(testcase.treeVals, false)
+		rb := TreeFromValues(testcase.treeVals, true)
+
+		referenceString := referenceTree.String()
+		rbString := rb.String()
+
+		if rbString != referenceString {
+			t.Errorf("InsertAndBalance(%v) Expected '%s' but got '%s' instead", testcase.treeVals, referenceString, rbString)
+		}
+	}
+}
+
+func TreeFromValues(vals []int, shouldBalance bool) *RBNode {
+	rb := RedBlackTree(vals[0])
+	var insert func(val int) *RBNode
+	if shouldBalance {
+		insert = func(val int) *RBNode {
+			potentialRoot := rb.InsertAndBalance(val)
+			if potentialRoot != nil && potentialRoot.parent == nil {
+				rb = potentialRoot
+			}
+			return rb
+		}
+	} else {
+		insert = func(val int) *RBNode {
+			return rb.Insert(val)
+		}
+	}
+	for i := range vals {
+		insert(vals[i])
+	}
+	return rb
 }
